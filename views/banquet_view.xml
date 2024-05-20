@@ -1,0 +1,531 @@
+<odoo>
+    <data>
+        <!--  banquet tree/view -->
+        <record model="ir.ui.view" id="pms_banquet.banquet_tree_view">
+            <field name="name">Kit Banquet list</field>
+            <field name="model">pms_banquet.banquet</field>
+            <field name="arch" type="xml">
+                <tree string="Banquets">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="cancellation_policy_id"/>
+                    <field name="total_pax"/>
+                    <field class="text-center" name="banquet_events" widget="many2many_tags"/>
+                    <field name="total_price_banquet" sum="total_price_banquet"/>
+                    <field name="currency_symbol" string=" "/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search view of Banquet -->
+        <record id="pms_banquet.banquet_search_view" model="ir.ui.view">
+            <field name="name">Banquet Search</field>
+            <field name="model">pms_banquet.banquet</field>
+            <field name="arch" type="xml">
+                <search string="Search Banquet">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <group name="state">
+                        <filter domain="[('state','=','draft')]" string="Draft" name="draft"/>
+                        <filter domain="[('state','=','sent')]" string="Sent" name="sent"/>
+                        <filter domain="[('state','=','confirmed')]" string="Confirmed" name="confirmed"/>
+                        <filter domain="[('state','=','done')]" string="Done" name="done"/>
+                        <filter domain="[('state','=','noshow')]" string="NoShow" name="noshow"/>
+                        <filter domain="[('state','=','cancel')]" string="Canceled" name="cancel"/>
+                    </group>
+                    <group expand="0" string="Group By">
+                        <filter name="state" string="State" icon="terp-personal"
+                                domain="[]" context="{'group_by':'state'}"/>
+                        <filter name="partner_id" string="Partner" icon="terp-personal"
+                                domain="[]" context="{'group_by':'partner_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--  banquet form/view -->
+        <record model="ir.ui.view" id="pms_banquet.banquet_form_view">
+            <field name="name">Kit Banquet form</field>
+            <field name="model">pms_banquet.banquet</field>
+            <field name="arch" type="xml">
+                <form string="Kit Banquet">
+                    <header>
+                        <button name="make_order_lines" string="Order" states="draft"
+                                class="btn-info" type="object"/>
+                        <button name="confirm_order" string="Confirm" states="quotation"
+                                class="btn-primary" type="object"/>
+                        <button name="cancel_order" string="Cancel" states="quotation,confirmed"
+                                class="btn-primary" type="object"/>
+                        <button name="print_quotation" string="Print" states="quotation,confirmed"
+                                class="btn-primary" type="object"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,quotation,confirmed,done"
+                               options="{'clickable': '1'}"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_show_orders" type="object" class="oe_stat_button"
+                                    icon="fa-pencil-square-o">
+                                <field name='order_count' widget="statinfo" string="Orders"/>
+                            </button>
+                            <button icon="fa-dollar" class="oe_stat_button" type="object" name="dummy">
+                                <field name="total_price_banquet" widget="statinfo"/>
+                            </button>
+                            <button icon="fa-calendar-day" class="oe_stat_button" type="object" name="dummy">
+                                <field name="duration" widget="statinfo"/>
+                            </button>
+                            <button icon="fa-male" class="oe_stat_button" type="object" name="dummy">
+                                <field name="total_pax" widget="statinfo"/>
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <group>
+                                <h1>
+                                    <field class="oe_inline" name="name" placeholder="Banquet Name"/>
+                                </h1>
+                            </group>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="description" widget="text"/>
+                                <field name="cancellation_policy_id"/>
+                                <field name="is_grouped"/>
+                            </group>
+                            <group>
+                                <field name="account_id" attrs="{'invisible':[('is_grouped','=', False)]}"/>
+                                <field name="partner_id"/>
+                                <field name="event_banquet_id"/>
+                            </group>
+                        </group>
+
+                        <notebook colspan="4">
+                            <page string="Banquet Events">
+                                <field name="banquet_events" widget="one2many">
+                                    <tree>
+                                        <field name="category_event_id"/>
+                                        <field name="description" widget="text"/>
+                                        <field name="checkin_date"/>
+                                        <field name="arrival_time" widget="float_time"/>
+                                        <field name="checkout_date"/>
+                                        <field name="price_event" sum="price_event"
+                                               style="color:blue ! important;"/>
+                                        <field name="max_pax" string="PAX"/>
+
+
+                                        <field name="price_kit_banquet" sum="total_kit_banquet"
+                                               string="Price kit banquet"
+                                               style="color:blue ! important;"/>
+                                        <field name="currency_symbol" string=" "/>
+                                        <field name="nbr_days"/>
+                                        <field name="total_kit_banquet" sum="total_kit_banquet"
+                                               string="Total Kit Banquet All duration"
+                                               style="color:blue ! important;"/>
+                                        <field name="currency_symbol" string=" "/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Sale orders">
+                                <field name="sale_order_ids" widget="one2many"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!--  kit banquet event config tree/view -->
+        <record model="ir.ui.view" id="pms_banquet.banquet_event_tree_config">
+            <field name="name">Kit Banquet Events list</field>
+            <field name="model">pms.bq.banquet.event</field>
+            <field name="arch" type="xml">
+                <tree string="Kit Banquets Events">
+                    <field name="banquet_name"/>
+                    <field name="partner_id"/>
+                    <field name="description"/>
+                    <field name="room_type"/>
+                    <field name="checkin_date"/>
+                    <field name="arrival_time" widget="float_time"/>
+                    <field name="checkout_date"/>
+                    <field name="price_event"/>
+                    <field name="currency_symbol" string=" "/>
+                    <field class="text-center" name="max_pax"/>
+                    <field class="text-center" name="nbr_days"/>
+                    <field name="total_kit_banquet"/>
+                    <field name="currency_symbol" string=" "/>
+                    <field name="event_state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--  kit banquet event config form/view -->
+        <record model="ir.ui.view" id="pms_banquet.banquet_event_form_config">
+            <field name="name">Kit Banquet Events</field>
+            <field name="model">pms.bq.banquet.event</field>
+            <field name="arch" type="xml">
+                <form string="Kit Banquet Events">
+                    <field name="payment_ids" invisible="1"/>
+                    <field name="category_event_name" invisible="1"/>
+                    <field name="id" invisible="1"/>
+                    <field name="total_kit_banquet" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                    <sheet>
+                        <header>
+                            <button name="generate_kit_banquets" type="object"
+                                    attrs="{'invisible':[('event_state','!=','draft')]}"
+                                    string="Generate Kit Banquets"
+                                    class="oe_highlight"
+                            />
+                            <button name="act_open_banquet_account" type="object"
+                                    attrs="{'invisible':[('event_state','!=','confirmed')]}"
+                                    string="Checkin"
+                                    class="btn-info"
+                            />
+
+                            <field name="event_state" widget="statusbar"
+                                   statusbar_visible="draft,confirmed,done"
+                                   options="{'clickable': '1'}"/>
+                        </header>
+                        <div class="oe_button_box" name="button_box">
+                            <button icon="fa-dollar" class="oe_stat_button" type="object" name="dummy">
+                                <field name="price_kit_banquet" widget="statinfo"/>
+                            </button>
+                            <button icon="fa-dollar" class="oe_stat_button" type="object" name="dummy">
+                                <field name="total_kit_banquet" widget="statinfo"/>
+                            </button>
+                            <button type="object"
+                                    name="reservation_schedule"
+                                    icon="fa-calendar"
+                                    string="Calendar"
+                            />
+                            <button type="object"
+                                    name="duplicate_line"
+                                    icon="fa-clone"
+                                    string="Duplicate"
+                            />
+                        </div>
+                        <group>
+                            <group>
+                                <field name="banquet" invisible="1"/>
+                                <field name="category_event_id" required="1"/>
+                                <field name="description" widget="text"/>
+                            </group>
+                            <group>
+                                <field name="room_type" domain="[('class_room_id', '=', 'Banquet')]"/>
+                                <field name="room_price" style="color:blue ! important;"/>
+                            </group>
+                            <!--                            <group>-->
+                            <!--                                <field name="account_id" widget="many2many_tags"-->
+                            <!--                                       attrs="{'invisible':[('event_state','=','draft')]}"/>-->
+                            <!--                            </group>-->
+                        </group>
+                        <group>
+                            <group>
+                                <field name="amenities_id" widget="many2many_tags"/>
+
+                                <field name="price_event" style="color:blue ! important;"/>
+                                <field name="nbr_days" style="color:blue ! important;"/>
+                            </group>
+                            <group>
+                                <label for="checkin_date"/>
+                                <div class="o_row">
+                                    <field name="checkin_date" required="1"/>
+                                    at
+                                    <field name="arrival_time" widget="float_time"/>
+                                </div>
+                                <label for="checkout_date"/>
+                                <div class="o_row">
+                                    <field name="checkout_date" required="1"/>
+                                    at
+                                    <field name="departure_time" widget="float_time"/>
+                                </div>
+                                <field name="min_pax"/>
+                                <field name="max_pax" string="PAX" required="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="kit_banquets" widget="many2many_tags" required="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <notebook colspan="4">
+                                <page string="Benefits">
+                                    <field name="banquet_details" widget="one2many">
+                                        <tree editable="bottom">
+                                            <field name="product"/>
+                                            <field name="product_id"/>
+                                            <field name="kit_banquet_category"/>
+                                            <field name="product_pack" widget="many2many_tags"/>
+                                            <field name="standard_price" sum="standard_price"
+                                                   style="color:blue ! important;"/>
+                                            <field name="list_price" sum="list_price" style="color:blue ! important;"/>
+                                            <field name="discount" sum="discount" style="color:blue ! important;"/>
+                                            <field name="net_price" sum="net_price" style="color:blue ! important;"/>
+                                            <field name="max_pax" sum="max_pax" style="color:blue ! important;"/>
+                                            <field name="total" sum="total" style="color:blue ! important;"/>
+                                        </tree>
+                                    </field>
+                                </page>
+                                <page string="Supplements">
+                                    <field name="supplement_ids" widget="one2many">
+                                        <tree editable="bottom">
+                                            <field name="product_id"/>
+                                            <field name="name"/>
+                                            <field name="quantity"/>
+                                            <field name="price_unit"/>
+                                            <field name="total"/>
+                                        </tree>
+                                    </field>
+                                </page>
+                                <page string="Accounts">
+                                    <field name="account_id" widget="one2many"/>
+                                </page>
+                            </notebook>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search view of Banquet Reservation -->
+        <record id="pms_banquet.banquet_reservation_search_view" model="ir.ui.view">
+            <field name="name">Banquet Reservation Search</field>
+            <field name="model">pms.bq.banquet.event</field>
+            <field name="arch" type="xml">
+                <search string="Search Banquet">
+                    <field name="name"/>
+                    <field name="room_type"/>
+                    <field name="partner_id"/>
+                    <field name="checkin_date"/>
+                    <field name="checkout_date"/>
+                    <field name="event_state"/>
+
+                    <group name="event_state">
+                        <filter domain="[('event_state','=','draft')]" string="Draft" name="draft"/>
+                        <filter domain="[('event_state','=','sent')]" string="Sent" name="sent"/>
+                        <filter domain="[('event_state','=','confirmed')]" string="Confirmed" name="confirmed"/>
+                        <filter domain="[('event_state','=','done')]" string="Done" name="done"/>
+                        <filter domain="[('event_state','=','noshow')]" string="NoShow" name="noshow"/>
+                        <filter domain="[('event_state','=','cancel')]" string="Canceled" name="cancel"/>
+                    </group>
+                    <group expand="0" string="Group By">
+                        <filter name="state" string="State" icon="terp-personal"
+                                domain="[]" context="{'group_by':'event_state'}"/>
+                        <filter name="room_type" string="Room " icon="terp-personal"
+                                domain="[]" context="{'group_by':'room_type'}"/>
+                        <filter name="partner_id" string="Partner" icon="terp-personal"
+                                domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter name="checkout_date" string="Checkout Date" icon="terp-personal"
+                                domain="[]" context="{'group_by':'checkout_date'}"/>
+                        <filter name="checkout_date" string="Checkout Date" icon="terp-personal"
+                                domain="[]" context="{'group_by':'checkout_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- calendar Banquet Reservation-->
+        <record id="view_banquet_reservation_calendar" model="ir.ui.view">
+            <field name="name">Banquet Reservation calendar</field>
+            <field name="model">pms.bq.banquet.event</field>
+            <field name="arch" type="xml">
+                <calendar date_start="checkin_date" date_stop="checkout_date" color="event_state" mode="month"
+                          event_open_popup="1">
+                    <field name="banquet_name"/>
+                    <field name="category_event_id"/>
+                </calendar>
+            </field>
+        </record>
+
+        <!-- Search view Banquet kit details   -->
+        <record id="pms_banquet.banquet_kit_search_view" model="ir.ui.view">
+            <field name="name">Banquet kit details Search</field>
+            <field name="model">pms.bq.banquetkit</field>
+            <field name="arch" type="xml">
+                <search string="Search kit Banquet">
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="category_id"/>
+                    <field name="active"/>
+
+                    <group name="active">
+                        <filter domain="[('active','=','Active')]" string="Active" name="active"/>
+                        <filter domain="[('active','=','Inactive')]" string="Inactive" name="inactive"/>
+                    </group>
+                    <group expand="0" string="Group By">
+                        <filter name="category_id" string="Category" icon="terp-personal"
+                                domain="[]" context="{'group_by':'category_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--  Banquet kit details kanban/view -->
+        <record model="ir.ui.view" id="banquet_kit_kanban">
+            <field name="name">Banquet kit details kanban</field>
+            <field name="model">pms.bq.banquetkit</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="category_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div class="o_kanban_image">
+                                    <field name="image_banquet_kit" widget="image" string=" "/>
+                                </div>
+                                <div class="oe_kanban_details">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div>
+                                        <strong>
+                                            <field name="category_id"/>
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <strong>
+                                            <field name="how_served"/>
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <strong>
+                                            From :
+                                            <field name="start_time" widget="float_time"/>
+                                            To :
+                                            <field name="end_time" widget="float_time"/>
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <strong>
+
+                                            <field name="total_kit_banquet" widget="monetary"/>
+                                            <field name="currency_symbol"/>
+                                        </strong>
+                                    </div>
+                                    <div name="tags"/>
+
+                                    <div name="tags"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!--  Banquet kit details  tree/view -->
+        <record model="ir.ui.view" id="pms_banquet.banquet_kit_details_tree_config">
+            <field name="name">Banquet kit details list</field>
+            <field name="model">pms.bq.banquetkit</field>
+            <field name="arch" type="xml">
+                <tree string="Banquets Details">
+                    <field name="name"/>
+                    <field name="category_id"/>
+                    <field name="start_time"/>
+                    <field name="end_time"/>
+                    <field name="how_served" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--  Banquet kit details  form/view -->
+        <record model="ir.ui.view" id="pms_banquet.banquet_kit_details_form_config">
+            <field name="name">Banquet kit details form</field>
+            <field name="model">pms.bq.banquetkit</field>
+            <field name="arch" type="xml">
+                <form string="Banquets details form">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object"
+                                    class="oe_stat_button" icon="fa-toggle-on">
+                                <field name="active" widget="boolean_button"
+                                       options='{"terminology": "active"}'/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="image_banquet_kit" widget="image" height="50" width="50"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="category_id"/>
+                                <field name="is_cafe" attrs="{'invisible': [('is_breakfast','=',True)]}"/>
+
+                                <field name="is_breakfast" attrs="{'invisible': [('is_cafe','=',True)]}"/>
+
+                            </group>
+                            <group>
+                                <field name="start_time" widget="float_time"/>
+                                <field name="end_time" widget="float_time"/>
+                                <field name="how_served" widget="many2many_tags"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="total_kit_banquet" widget="monetary"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="banquet_kit_details">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="product"/>
+                                    <field name="product_pack" widget="many2many_tags"/>
+                                    <field name="standard_price" sum="standard_price" style="color:blue ! important;"/>
+                                    <field name="list_price" sum="list_price" style="color:blue ! important;"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <!--  kit banquet category config tree/view -->
+        <record model="ir.ui.view" id="pms_banquet.category_tree_config">
+            <field name="name">Banquet Category list</field>
+            <field name="model">pms.bq.category</field>
+            <field name="arch" type="xml">
+                <tree string="Kit Banquets Categories">
+                    <field name="name"/>
+                    <field name="complete_name"/>
+                    <field name="description"/>
+                    <field name="type"/>
+                    <field name="parent_id"/>
+                    <field name="child_id" widget="many2many_tags"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--  kit banquet category config form/view -->
+        <record model="ir.ui.view" id="pms_banquet.category_form_config">
+            <field name="name">Banquet Category</field>
+            <field name="model">pms.bq.category</field>
+            <field name="arch" type="xml">
+                <form string="Kit Banquet Categories ">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="img" widget="image" style="width:50px;"/>
+                            </group>
+                            <group>
+                                <field name="name"/>
+                                <field name="complete_name"/>
+                                <field name="description" widget="text"/>
+                                <field name="type"/>
+                                <field name="parent_id"/>
+                                <field name="child_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

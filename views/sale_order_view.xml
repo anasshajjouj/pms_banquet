@@ -1,0 +1,15 @@
+<odoo>
+    <data>
+        <!--  order tree/view -->
+        <record model="ir.ui.view" id="pms_banquet.order_tree_view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/group/group/field[@name='partner_id']" position="after">
+                    <field name="banquet_id"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

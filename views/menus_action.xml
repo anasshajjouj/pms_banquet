@@ -1,0 +1,180 @@
+<odoo>
+    <data>
+        <!-- Action banquet tree/view -->
+        <record model="ir.actions.act_window" id="action_banquet_tree_view">
+            <field name="name">Banquet list</field>
+            <field name="res_model">pms_banquet.banquet</field>
+            <field name="view_id" ref="pms_banquet.banquet_tree_view"/>
+            <field name="view_mode">tree,form,search</field>
+        </record>
+
+        <!-- Action banquet categories config  -->
+        <record id="pms_banquet.banquet_category_config_form" model="ir.actions.act_window">
+            <field name="name">Kit Banquet Categories</field>
+            <field name="res_model">pms.bq.category</field>
+            <field name="view_id" ref="pms_banquet.category_tree_config"/>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Action banquet kit details  -->
+        <record id="pms_banquet.banquet_kit_details_form" model="ir.actions.act_window">
+            <field name="name">Kit Banquet kit details</field>
+            <field name="res_model">pms.bq.banquetkit</field>
+            <field name="view_id" ref="banquet_kit_kanban"/>
+            <field name="view_mode">kanban,form,tree</field>
+        </record>
+
+        <!-- Action room view  -->
+        <record id="pms_banquet.room_view_kanban" model="ir.actions.act_window">
+            <field name="name">Room view</field>
+            <field name="res_model">pms.room</field>
+            <field name="context">{'search_default_group_floor':1}</field>
+            <field name="view_id" ref="view_bq_pms_room_kanban"/>
+            <field name="view_mode">kanban,form,tree</field>
+            <field name="domain">[('class_room_id', '=', 'Banquet')]</field>
+        </record>
+
+        <!-- Action room view  -->
+        <record id="pms_banquet.room_type_view" model="ir.actions.act_window">
+            <field name="name">Room Type</field>
+            <field name="res_model">pms.room.type</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('class_room_id', '=', 'Banquet')]</field>
+        </record>
+
+        <!-- Action Order -->
+        <record id="pms_banquet.banquet_order" model="ir.actions.act_window">
+            <field name="name">sale.order.form</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">form</field>
+        </record>
+
+        <!-- Action banquet reservation tree/view -->
+        <record id="pms_banquet.banquet_reservation" model="ir.actions.act_window">
+            <field name="name">Banquet Reservation</field>
+            <field name="res_model">pms.bq.banquet.event</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('pms_banquet.banquet_event_tree_config')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('pms_banquet.banquet_event_form_config')})]"/>
+            <field name="context">{'search_default_confirmed':1}</field>
+            <field name="view_mode">tree,form,search,calendar</field>
+        </record>
+
+        <!-- Banquet account action opening -->
+        <record model="ir.actions.act_window" id="action_banquet_account_tree_view">
+            <field name="name">Guests Accounts list</field>
+            <field name="res_model">pms_account.account</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('pms_banquet.banquet_account_tree_view')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('pms_banquet.banquet_account_form_view')})]"/>
+            <field name="domain">[
+                ('group_account','=',False),
+                ('banquet_account','=',True),
+                ('pfm_account','=',False)
+                ]
+            </field>
+            <field name="context">{'search_default_opened':1}</field>
+            <field name="view_mode">tree,form,search</field>
+        </record>
+
+        <!-- Banquet account group action opening -->
+        <record model="ir.actions.act_window" id="action_group_banquet_account_tree_view">
+            <field name="name">Group Accounts list</field>
+            <field name="res_model">pms_account.account</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('pms_banquet.banquet_account_tree_view')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('pms_banquet.banquet_account_form_view')})]"/>
+            <field name="domain">[('group_account','=',True), ('banquet_account','=',True)]</field>
+            <field name="view_mode">tree,form,search</field>
+            <field name="context">{'search_default_opened':1}</field>
+        </record>
+
+
+        <!-- Menu banquet root -->
+        <menuitem name="Banquet" id="pms_banquet.menu_hotel_banquet"
+                  web_icon="pms_banquet,static/description/icon.png"/>
+
+        <!-- Submenu banquet -->
+        <menuitem name="Banquet " id="pms_banquet.menu_banquet" parent="pms_banquet.menu_hotel_banquet"
+                  action="pms_banquet.action_banquet_tree_view" sequence="10"/>
+
+        <!-- Submenu banquet Reservation-->
+        <menuitem name="Banquet Reservation" id="pms_banquet.menu_banquet_reservation"
+                  parent="pms_banquet.menu_hotel_banquet"
+                  action="pms_banquet.banquet_reservation" sequence="20"/>
+
+        <!-- Menu Banquet Accounts root-->
+        <menuitem name="Accounts" id="pms_banquet.menu_accounts" parent="pms_banquet.menu_hotel_banquet"
+                  sequence="30"/>
+        <!-- Submenu banquet accounts-->
+        <menuitem name="Accounts" id="pms_banquet.menu_banquet_accounts"
+                  parent="pms_banquet.menu_accounts"
+                  action="pms_banquet.action_banquet_account_tree_view" sequence="10"/>
+
+        <menuitem name="Group Accounts" id="pms_banquet.menu_banquet_group_accounts"
+                  parent="pms_banquet.menu_accounts"
+                  action="pms_banquet.action_group_banquet_account_tree_view" sequence="20"/>
+
+        <!--- =================================== sub menu attach / detach accounts =============================== -->
+        <menuitem name="Attach / Detach Accounts" id="hotel_wizard07" sequence="30"
+                  parent="pms_banquet.menu_accounts" action="pms_account.select_line_attach_detach_action"/>
+
+        <!-- Submenu banquet event -->
+        <menuitem name="Banquet Event" id="pms_banquet.menu_banquet_event" parent="pms_banquet.menu_hotel_banquet"
+                  action="pms_banquet.banquet_event_form_tree" sequence="40"/>
+
+
+        <!-- Menu Rooms root -->
+        <menuitem name="Banquet Rooms" id="pms_banquet.banquet_rooms" parent="pms_banquet.menu_hotel_banquet"
+                  sequence="50"/>
+
+        <!-- Submenu Rooms views -->
+        <menuitem name="Rooms" id="pms_banquet.menu_room_view" parent="pms_banquet.banquet_rooms"
+                  action="pms_banquet.room_view_kanban" sequence="10"/>
+
+        <!-- Submenu Rooms Type -->
+        <menuitem name="Room Type" id="pms_banquet.menu_room_type" parent="pms_banquet.banquet_rooms"
+                  action="pms_banquet.room_type_view" sequence="20"/>
+
+
+        <!-- Menu Configuration root -->
+        <menuitem name="Configuration" id="pms_banquet.menu_config" parent="pms_banquet.menu_hotel_banquet"
+                  sequence="100"/>
+
+        <!-- Submenu configuration -->
+        <menuitem name="Banquet Categories" id="pms_banquet.menu_banquet_category_configuration"
+                  parent="pms_banquet.menu_config"
+                  action="pms_banquet.banquet_category_config_form" sequence="20"/>
+
+        <menuitem name="Kit Banquet" id="pms_banquet.menu_banquet_kit_details_configuration"
+                  parent="pms_banquet.menu_config"
+                  action="pms_banquet.banquet_kit_details_form" sequence="30"/>
+
+        <menuitem name="Product Pack" id="menu_product_pack_core" parent="pms_banquet.menu_config" sequence="40"
+                  action="pms_kit_product.action_product_pack"/>
+
+        <!-- Menu Reporting-->
+        <menuitem name="Reports" id="pms_banquet.menu_reporting" parent="pms_banquet.menu_hotel_banquet"
+                  sequence="90"/>
+
+        <!-- SubMenu Pause Cafe report  -->
+        <act_window id="action_pause_cafe_report_wizard"
+                    name="Pause Cafe Report"
+                    res_model="pause.cafe.report.wizard"
+                    view_mode="form"
+                    target="new"/>
+        <menuitem name="Pause Cafe Report" action="action_pause_cafe_report_wizard" id="pause_cafe_report_wizard01"
+                  sequence="10"
+                  parent="pms_banquet.menu_reporting"/>
+
+        <!-- SubMenu Petit Dejeuner report  -->
+        <act_window id="action_petit_dejeuner_report_wizard"
+                    name="Petit Dejeuner Report"
+                    res_model="petit.dejeuner.report.wizard"
+                    view_mode="form"
+                    target="new"/>
+        <menuitem name="Petit Dejeuner Report" action="action_petit_dejeuner_report_wizard"
+                  id="petit_dejeuner_report_wizard01" sequence="20"
+                  parent="pms_banquet.menu_reporting"/>
+    </data>
+</odoo>

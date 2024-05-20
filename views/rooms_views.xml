@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Room Kanban view -->
+    <record id="view_bq_pms_room_kanban" model="ir.ui.view">
+        <field name="name">pms.room.kanban</field>
+        <field name="model">pms.room</field>
+        <field name="inherit_id" ref="pms_account.view_pms_room_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban/templates/t/div/div/group[@name='infos']" position="after">
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

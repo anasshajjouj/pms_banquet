@@ -1,0 +1,20 @@
+<odoo>
+    <!--    <record model="ir.ui.view" id="view_banquet_event_form">-->
+    <!--        <field name="name">event.event.form</field>-->
+    <!--        <field name="model">event.event</field>-->
+    <!--        <field name="inherit_id" ref="event.view_event_form"/>-->
+    <!--    </record>-->
+    <!--    <record id="view_banquet_event_tree_inherited" model="ir.ui.view">-->
+    <!--        <field name="name">pms.room.tree</field>-->
+    <!--        <field name="model">event.event</field>-->
+    <!--        <field name="inherit_id" ref="event.view_event_tree"/>-->
+    <!--    </record>-->
+
+    <record id="pms_banquet.banquet_event_form_tree" model="ir.actions.act_window">
+        <field name="name">Banquet Event list</field>
+        <field name="res_model">event.event</field>
+        <field name="view_id" ref="event.view_event_form"/>
+        <field name="view_id" ref="event.view_event_tree"/>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
